@@ -24,19 +24,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// 🎡 секции
 const segments = ["🎉","🎁","💰","🔥","⭐","🍀"];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
-
   const [rotation, setRotation] = useState(0);
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminPass, setAdminPass] = useState("");
+  // 👉 временно всегда админ (чтобы работало)
+  const isAdmin = true;
 
-  // ✅ генерация кода
+  // 🔥 генерация кода
   const generateCode = async () => {
     try {
       const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -47,7 +47,7 @@ export default function Home() {
 
       alert("CODE: " + newCode);
     } catch (e) {
-      alert("Ошибка Firebase");
+      alert("Firebase error");
       console.error(e);
     }
   };
@@ -82,7 +82,7 @@ export default function Home() {
       setInput("");
 
     } catch (e) {
-      alert("Ошибка при spin");
+      alert("Spin error");
       console.error(e);
     }
   };
@@ -90,14 +90,14 @@ export default function Home() {
   return (
     <div className="container">
 
-      {/* 🔥 СТАРТОВЫЙ ЭКРАН */}
+      {/* 🔥 СТАРТ */}
       {!started && (
         <button className="sex" onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
-      {/* 🎡 ОСНОВНОЙ ЭКРАН */}
+      {/* 🎡 ОСНОВА */}
       {started && (
         <div className="wrap">
 
@@ -109,7 +109,7 @@ export default function Home() {
           >
             {segments.map((emoji, i) => {
               const angle = (i * 60 - 90) * (Math.PI / 180);
-              const r = 140;
+              const r = 150;
 
               return (
                 <div
@@ -126,38 +126,22 @@ export default function Home() {
             })}
           </div>
 
-          <input
-            placeholder="Enter code"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
+          <div className="controls">
+            <input
+              placeholder="Enter code"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
 
-          <button onClick={spin}>SPIN</button>
+            <button onClick={spin}>SPIN</button>
 
-          {/* 🔐 АДМИН */}
-          {!isAdmin ? (
-            <>
-              <input
-                type="password"
-                placeholder="Admin password"
-                value={adminPass}
-                onChange={(e) => setAdminPass(e.target.value)}
-              />
-
-              <button
-                onClick={() => {
-                  if (adminPass === "admin123") setIsAdmin(true);
-                  else alert("Wrong password");
-                }}
-              >
-                Login
-              </button>
-            </>
-          ) : (
-            <button onClick={generateCode}>Generate code</button>
-          )}
+            {isAdmin && (
+              <button onClick={generateCode}>Generate</button>
+            )}
+          </div>
 
           <h2>{result}</h2>
+
         </div>
       )}
 
@@ -187,27 +171,38 @@ export default function Home() {
           100% { transform: scale(1); }
         }
 
+        .wrap {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
         .wheel {
-          width: 400px;
-          height: 400px;
+          width: 420px;
+          height: 420px;
           border-radius: 50%;
-          background: conic-gradient(
-            #ff0055,
-            #ffcc00,
-            #00ff88,
-            #00c3ff,
-            #7a00ff,
-            #ff00cc
-          );
           position: relative;
+          margin-bottom: 30px;
           transition: transform 4s ease-out;
-          margin-bottom: 20px;
+
+          background: conic-gradient(
+            #ff0055 0deg 60deg,
+            #ffcc00 60deg 120deg,
+            #00ff88 120deg 180deg,
+            #00c3ff 180deg 240deg,
+            #7a00ff 240deg 300deg,
+            #ff00cc 300deg 360deg
+          );
+
+          box-shadow:
+            inset 0 0 40px rgba(255,255,255,0.3),
+            0 15px 30px rgba(0,0,0,0.4);
         }
 
         .emoji {
           position: absolute;
           transform: translate(-50%, -50%);
-          font-size: 34px;
+          font-size: 36px;
         }
 
         .arrow {
@@ -219,18 +214,26 @@ export default function Home() {
           margin-bottom: 10px;
         }
 
+        .controls {
+          display: flex;
+          gap: 10px;
+          margin-top: 10px;
+        }
+
         input {
-          margin: 5px;
           padding: 10px;
           border-radius: 10px;
+          border: 2px solid black;
+          background: rgba(0,0,0,0.6);
+          color: white;
         }
 
         button {
-          margin: 5px;
           padding: 10px 20px;
           border-radius: 10px;
           background: black;
           color: white;
+          border: 2px solid white;
         }
       `}</style>
     </div>
