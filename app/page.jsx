@@ -1,7 +1,14 @@
 "use client";
 import { useState } from "react";
 
-const emojis = ["🎉", "🎁", "💰", "🔥", "⭐", "🍀"];
+const segments = [
+  { emoji: "🎉", color: "#ff4d6d" },
+  { emoji: "🎁", color: "#ff6b81" },
+  { emoji: "💰", color: "#f9c74f" },
+  { emoji: "🔥", color: "#06d6a0" },
+  { emoji: "🍀", color: "#118ab2" },
+  { emoji: "⭐", color: "#9b5de5" },
+];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
@@ -25,48 +32,68 @@ export default function Home() {
       return;
     }
 
-    const index = Math.floor(Math.random() * emojis.length);
-    const angle = 360 / emojis.length;
+    const index = Math.floor(Math.random() * segments.length);
+    const angle = 360 / segments.length;
 
-    const finalRotation = rotation + 360 * 6 + (360 - index * angle);
+    const final = rotation + 360 * 5 + index * angle;
 
-    setRotation(finalRotation);
-    setResult(emojis[index]);
+    setRotation(final);
+    setResult(segments[index].emoji);
 
     setCodes(codes.filter(c => c !== input));
     setInput("");
 
-    setTimeout(() => setShowWin(true), 4000);
+    setTimeout(() => setShowWin(true), 3500);
   };
 
   return (
-    <div className="container">
+    <div style={styles.container}>
 
       {!started && (
-        <button className="sex" onClick={() => setStarted(true)}>
+        <button style={styles.sexBtn} onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
       {started && (
         <>
-          <div className="wheel-wrap">
-            <div className="arrow"></div>
+          <div style={styles.wrapper}>
+            <div style={styles.arrow}></div>
 
             <div
-              className="wheel"
+              style={{
+                ...styles.wheel,
+                transform: `rotate(${rotation}deg)`
+              }}
               onClick={spin}
-              style={{ transform: `rotate(${rotation}deg)` }}
-            />
+            >
+              {segments.map((seg, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.segment,
+                    background: seg.color,
+                    transform: `rotate(${i * 60}deg)`
+                  }}
+                >
+                  <span style={styles.emoji}>{seg.emoji}</span>
+                </div>
+              ))}
+
+              <div style={styles.center}></div>
+            </div>
           </div>
 
           <input
             placeholder="Enter code"
             value={input}
             onChange={e => setInput(e.target.value)}
+            style={styles.input}
           />
 
-          <button onClick={spin}>SPIN</button>
+          <button onClick={spin} style={styles.spinBtn}>
+            SPIN
+          </button>
 
           {!isAdmin ? (
             <input
@@ -74,104 +101,141 @@ export default function Home() {
               onChange={e => {
                 if (e.target.value === ADMIN_PASS) setIsAdmin(true);
               }}
+              style={styles.input}
             />
           ) : (
             <>
-              <button onClick={generateCode}>Generate Code</button>
-              <div>{codes.join(", ")}</div>
+              <button onClick={generateCode} style={styles.adminBtn}>
+                Generate Code
+              </button>
+              <div style={{ color: "white" }}>{codes.join(", ")}</div>
             </>
           )}
         </>
       )}
 
       {showWin && (
-        <div className="overlay">
-          <h1>{result}</h1>
-          <button onClick={() => setShowWin(false)}>SPIN AGAIN</button>
+        <div style={styles.overlay}>
+          <div style={styles.winBox}>
+            <h1 style={{ fontSize: "100px" }}>{result}</h1>
+            <button onClick={() => setShowWin(false)} style={styles.spinBtn}>
+              SPIN AGAIN
+            </button>
+          </div>
         </div>
       )}
-
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          background: #fd58e7;
-          text-align: center;
-          padding-top: 50px;
-        }
-
-        .sex {
-          font-size: 50px;
-          padding: 30px 90px;
-          border-radius: 30px;
-          background: #ff00aa;
-          color: white;
-          border: 2px solid black;
-          animation: pulse 1.2s infinite;
-        }
-
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-
-        .wheel-wrap {
-          position: relative;
-          width: 500px;
-          margin: auto;
-        }
-
-        .wheel {
-          width: 500px;
-          height: 500px;
-          border-radius: 50%;
-          border: 15px solid black;
-          transition: transform 4s cubic-bezier(.17,.67,.83,.67);
-          background: conic-gradient(
-            #ff4d6d 0deg 60deg,
-            #ffd166 60deg 120deg,
-            #06d6a0 120deg 180deg,
-            #118ab2 180deg 240deg,
-            #9b5de5 240deg 300deg,
-            #f15bb5 300deg 360deg
-          );
-        }
-
-        .arrow {
-          position: absolute;
-          top: -30px;
-          left: 50%;
-          transform: translateX(-50%);
-          border-left: 20px solid transparent;
-          border-right: 20px solid transparent;
-          border-bottom: 35px solid black;
-        }
-
-        input {
-          margin-top: 15px;
-          padding: 10px;
-        }
-
-        button {
-          margin-top: 10px;
-          padding: 10px 20px;
-        }
-
-        .overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0,0,0,0.8);
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .overlay h1 {
-          font-size: 120px;
-          color: white;
-        }
-      `}</style>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg,#ff9ad5,#fd58e7)",
+    textAlign: "center",
+    paddingTop: "40px"
+  },
+
+  sexBtn: {
+    fontSize: "50px",
+    padding: "30px 90px",
+    borderRadius: "30px",
+    background: "#ff00aa",
+    color: "white",
+    border: "2px solid black",
+    animation: "pulse 1.2s infinite"
+  },
+
+  wrapper: {
+    position: "relative",
+    width: "420px",
+    margin: "auto"
+  },
+
+  wheel: {
+    width: "420px",
+    height: "420px",
+    borderRadius: "50%",
+    border: "12px solid black",
+    position: "relative",
+    overflow: "hidden",
+    transition: "transform 3.5s cubic-bezier(0.2,0.8,0.2,1)"
+  },
+
+  segment: {
+    position: "absolute",
+    width: "50%",
+    height: "50%",
+    top: "50%",
+    left: "50%",
+    transformOrigin: "0% 0%",
+    clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  emoji: {
+    transform: "rotate(30deg)",
+    fontSize: "30px"
+  },
+
+  center: {
+    position: "absolute",
+    width: "60px",
+    height: "60px",
+    background: "gold",
+    borderRadius: "50%",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    border: "3px solid black"
+  },
+
+  arrow: {
+    position: "absolute",
+    top: "-25px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    borderLeft: "20px solid transparent",
+    borderRight: "20px solid transparent",
+    borderBottom: "35px solid black"
+  },
+
+  input: {
+    marginTop: "15px",
+    padding: "10px",
+    borderRadius: "10px"
+  },
+
+  spinBtn: {
+    marginTop: "10px",
+    padding: "12px 30px",
+    background: "black",
+    color: "white",
+    borderRadius: "10px"
+  },
+
+  adminBtn: {
+    marginTop: "10px",
+    padding: "10px 20px",
+    background: "green",
+    color: "white",
+    borderRadius: "10px"
+  },
+
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.8)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  winBox: {
+    background: "white",
+    padding: "60px",
+    borderRadius: "20px"
+  }
+};
