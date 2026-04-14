@@ -1,13 +1,20 @@
 "use client";
 import { useState } from "react";
 
+const segments = [
+  { emoji: "🎉", color: "#ff4d6d" },
+  { emoji: "🎁", color: "#f9c74f" },
+  { emoji: "💰", color: "#43aa8b" },
+  { emoji: "🔥", color: "#f3722c" },
+  { emoji: "⭐", color: "#577590" },
+  { emoji: "🍀", color: "#9b5de5" },
+];
+
 export default function Home() {
   const [started, setStarted] = useState(false);
-  const [showWheel, setShowWheel] = useState(false);
-
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState("");
-  const [showResult, setShowResult] = useState(false);
+  const [showWin, setShowWin] = useState(false);
 
   const [code, setCode] = useState("");
   const [input, setInput] = useState("");
@@ -15,7 +22,7 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPass, setAdminPass] = useState("");
 
-  const prizes = ["🎁", "💰", "🔥", "🍀", "⭐", "🎉"];
+  const ADMIN_PASS = "admin123";
 
   const generateCode = () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -23,200 +30,126 @@ export default function Home() {
   };
 
   const spin = () => {
-    if (!input || input !== code) {
-      alert("Enter a valid code");
+    if (input !== code) {
+      alert("Invalid code");
       return;
     }
 
-    const index = Math.floor(Math.random() * prizes.length);
+    const index = Math.floor(Math.random() * segments.length);
+    const angle = 360 / segments.length;
 
-    const newRotation =
-      rotation + 360 * 6 + (360 - index * (360 / prizes.length));
+    const final = rotation + 360 * 6 + index * angle;
 
-    setRotation(newRotation);
-
-    setTimeout(() => {
-      setResult(prizes[index]);
-      setShowResult(true);
-    }, 4000);
+    setRotation(final);
+    setResult(segments[index].emoji);
 
     setCode("");
     setInput("");
+
+    setTimeout(() => setShowWin(true), 4000);
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center flex-col relative overflow-hidden">
+    <div className="container">
 
-      {/* 🌸 ФОН */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: "url('/bg.jpg')" }}
-      />
-      <div className="absolute inset-0 bg-black/10 -z-10" />
-
-      {/* 🔥 START */}
       {!started && (
-        <button
-          onClick={() => {
-            setStarted(true);
-            setTimeout(() => setShowWheel(true), 300);
-          }}
-          className="sex-btn"
-        >
+        <button className="sex" onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
-      {/* 🎡 WHEEL */}
       {started && (
-        <div
-          className={`flex flex-col items-center transition-all duration-700 ${
-            showWheel ? "opacity-100 scale-100" : "opacity-0 scale-75"
-          }`}
-        >
-          <div className="relative w-[650px] h-[650px]">
+        <div className="wheel-container">
 
-            {/* стрелка */}
-            <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 z-10 w-0 h-0 border-l-[20px] border-r-[20px] border-b-[30px] border-l-transparent border-r-transparent border-b-black"></div>
+          {/* стрелка */}
+          <div className="arrow"></div>
 
-            {/* колесо */}
-            <div
-              onClick={spin}
-              className="w-full h-full rounded-full border-[14px] border-black shadow-2xl flex items-center justify-center relative cursor-pointer"
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                willChange: "transform",
-                transition: "transform 4s cubic-bezier(0.25,1,0.5,1)",
-                background: `
-                  conic-gradient(
-                    #ff4d6d 0deg 60deg,
-                    #ffd166 60deg 120deg,
-                    #06d6a0 120deg 180deg,
-                    #118ab2 180deg 240deg,
-                    #9b5de5 240deg 300deg,
-                    #f15bb5 300deg 360deg
-                  )
-                `
-              }}
-            >
-              {/* СМАЙЛЫ — ФИКС */}
-              {prizes.map((emoji, i) => {
-                const angle = i * 60 + 30;
-                return (
-                  <div
-                    key={i}
-                    className="absolute text-4xl"
-                    style={{
-                      top: "50%",
-                      left: "50%",
-                      transform: `
-                        rotate(${angle}deg)
-                        translate(-50%, -50%)
-                        translateY(-240px)
-                        rotate(-${angle}deg)
-                      `,
-                      transformOrigin: "center"
-                    }}
-                  >
-                    {emoji}
-                  </div>
-                );
-              })}
-
-              {/* центр */}
-              <div className="absolute w-24 h-24 bg-yellow-400 rounded-full border-4 border-black flex items-center justify-center">
-                🎡
+          {/* колесо */}
+          <div
+            className="wheel"
+            onClick={spin}
+            style={{ transform: `rotate(${rotation}deg)` }}
+          >
+            {segments.map((seg, i) => (
+              <div
+                key={i}
+                className="segment"
+                style={{
+                  background: seg.color,
+                  transform: `rotate(${i * 60}deg)`
+                }}
+              >
+                <span className="emoji">{seg.emoji}</span>
               </div>
-            </div>
+            ))}
+
+            <div className="center"></div>
           </div>
 
           {/* UI */}
-          <div className="mt-8 flex flex-col items-center gap-4">
+          <input
+            placeholder="Enter code"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
 
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter code"
-              className="px-6 py-3 rounded-xl border-2 border-black bg-white text-black"
-            />
+          <button onClick={spin}>SPIN</button>
 
-            <button
-              onClick={spin}
-              className="px-10 py-3 bg-black text-white rounded-xl hover:scale-105 transition"
-            >
-              Spin
-            </button>
-
-            {/* ADMIN */}
-            <div className="mt-4 flex flex-col items-center gap-2">
-
+          {!isAdmin ? (
+            <>
               <input
                 type="password"
                 placeholder="Admin password"
                 value={adminPass}
                 onChange={(e) => setAdminPass(e.target.value)}
-                className="px-4 py-2 border-2 border-black rounded-xl bg-white text-black"
               />
-
               <button
                 onClick={() => {
-                  if (adminPass === "admin123") setIsAdmin(true);
+                  if (adminPass === ADMIN_PASS) setIsAdmin(true);
                   else alert("Wrong password");
                 }}
-                className="bg-black text-white px-6 py-2 rounded-xl"
               >
-                Login as admin
+                Login
               </button>
+            </>
+          ) : (
+            <>
+              <button onClick={generateCode}>Generate code</button>
+              {code && <div>{code}</div>}
+            </>
+          )}
+        </div>
+      )}
 
-              {isAdmin && (
-                <>
-                  <button
-                    onClick={generateCode}
-                    className="bg-green-500 text-white px-6 py-2 rounded-xl"
-                  >
-                    Generate code
-                  </button>
-
-                  {code && <div className="text-black font-bold">{code}</div>}
-                </>
-              )}
-            </div>
+      {showWin && (
+        <div className="overlay">
+          <div className="win">
+            <div className="big">{result}</div>
+            <button onClick={() => setShowWin(false)}>SPIN AGAIN</button>
           </div>
         </div>
       )}
 
-      {/* 🎉 RESULT */}
-      {showResult && (
-        <div className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-50">
-
-          <div className="text-[120px] mb-6 animate-bounce">
-            {result}
-          </div>
-
-          <button
-            onClick={() => {
-              setShowResult(false);
-              setResult("");
-            }}
-            className="px-10 py-4 bg-white text-black rounded-xl text-xl hover:scale-110 transition"
-          >
-            Spin again
-          </button>
-
-        </div>
-      )}
-
-      {/* стили */}
       <style jsx>{`
-        .sex-btn {
-          font-size: 40px;
-          font-weight: bold;
-          padding: 30px 80px;
+        .container {
+          min-height: 100vh;
+          background: linear-gradient(135deg,#ff9ad5,#fd58e7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+        }
+
+        /* SEX BUTTON */
+        .sex {
+          font-size: 50px;
+          padding: 30px 90px;
           border-radius: 30px;
-          background: linear-gradient(145deg, #ff4fd8, #ff008c);
+          background: linear-gradient(145deg,#ff4fd8,#ff008c);
           color: white;
-          border: 2px solid black;
-          animation: pulse 1.5s infinite;
+          border: 3px solid black;
+          animation: pulse 1.2s infinite;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         @keyframes pulse {
@@ -224,8 +157,104 @@ export default function Home() {
           50% { transform: scale(1.1); }
           100% { transform: scale(1); }
         }
-      `}</style>
 
-    </main>
+        .wheel-container {
+          animation: fadeIn 0.7s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.8); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        .wheel {
+          width: 420px;
+          height: 420px;
+          border-radius: 50%;
+          border: 12px solid black;
+          position: relative;
+          overflow: hidden;
+          transition: transform 4s cubic-bezier(.2,.8,.2,1);
+          margin-bottom: 20px;
+        }
+
+        .segment {
+          position: absolute;
+          width: 50%;
+          height: 50%;
+          top: 50%;
+          left: 50%;
+          transform-origin: 0% 0%;
+          clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .emoji {
+          transform: rotate(30deg);
+          font-size: 28px;
+        }
+
+        .center {
+          position: absolute;
+          width: 60px;
+          height: 60px;
+          background: gold;
+          border-radius: 50%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          border: 3px solid black;
+        }
+
+        .arrow {
+          width: 0;
+          height: 0;
+          border-left: 20px solid transparent;
+          border-right: 20px solid transparent;
+          border-bottom: 30px solid black;
+          margin-bottom: 10px;
+        }
+
+        input {
+          margin: 5px;
+          padding: 10px;
+          border-radius: 10px;
+        }
+
+        button {
+          margin: 5px;
+          padding: 10px 20px;
+          border-radius: 10px;
+          background: black;
+          color: white;
+        }
+
+        .overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .big {
+          font-size: 120px;
+          margin-bottom: 20px;
+        }
+
+        .win {
+          background: white;
+          padding: 40px;
+          border-radius: 20px;
+          text-align: center;
+        }
+      `}</style>
+    </div>
   );
 }
