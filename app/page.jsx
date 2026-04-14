@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 
-// 🔥 Firebase
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -24,65 +23,59 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🎡
 const segments = ["🎉","🎁","💰","🔥","⭐","🍀"];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [input, setInput] = useState("");
-  const [result, setResult] = "";
+  const [result, setResult] = useState("");
+  const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // 🔐 админ
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPass, setAdminPass] = useState("");
 
   // 🔥 генерация
   const generateCode = async () => {
-    try {
-      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      await addDoc(collection(db, "codes"), { code });
-
-      alert("CODE: " + code);
-    } catch (e) {
-      alert("Firebase ERROR");
-      console.log(e);
-    }
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    await addDoc(collection(db, "codes"), { code });
   };
 
   // 🎰 spin
   const spin = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "codes"));
+    if (!input) return;
 
-      let found = null;
+    setLoading(true);
 
-      snapshot.forEach((d) => {
-        if (d.data().code === input) {
-          found = d;
-        }
-      });
+    const snapshot = await getDocs(collection(db, "codes"));
+    let found = null;
 
-      if (!found) {
-        alert("Invalid code");
-        return;
-      }
+    snapshot.forEach((d) => {
+      if (d.data().code === input) found = d;
+    });
 
-      await deleteDoc(doc(db, "codes", found.id));
-
-      const index = Math.floor(Math.random() * 6);
-      const angle = 360 / 6;
-
-      const final = rotation + 360 * 6 + (360 - index * angle);
-
-      setRotation(final);
-      setResult(segments[index]);
-      setInput("");
-
-    } catch (e) {
-      alert("Spin error");
+    if (!found) {
+      setLoading(false);
+      return;
     }
+
+    await deleteDoc(doc(db, "codes", found.id));
+
+    const index = Math.floor(Math.random() * 6);
+    const angle = 360 / 6;
+
+    const final = rotation + 360 * 6 + (360 - index * angle);
+
+    setRotation(final);
+    setResult(segments[index]);
+    setInput("");
+
+    // ⏳ ждем пока колесо докрутится
+    setTimeout(() => {
+      setShowResult(true);
+      setLoading(false);
+    }, 4000);
   };
 
   return (
@@ -100,7 +93,7 @@ export default function Home() {
           <div className="arrow"></div>
 
           <div
-            className="wheel"
+            className={`wheel ${loading ? "spinning" : ""}`}
             style={{ transform: `rotate(${rotation}deg)` }}
           >
             {segments.map((e, i) => {
@@ -123,7 +116,6 @@ export default function Home() {
           </div>
 
           <div className="controls">
-
             <input
               placeholder="Enter code"
               value={input}
@@ -142,13 +134,11 @@ export default function Home() {
                 />
 
                 <button
-                  onClick={() => {
-                    if (adminPass === "admin123") {
-                      setIsAdmin(true);
-                    } else {
-                      alert("Wrong password");
-                    }
-                  }}
+                  onClick={() =>
+                    adminPass === "admin123"
+                      ? setIsAdmin(true)
+                      : null
+                  }
                 >
                   Login
                 </button>
@@ -156,11 +146,24 @@ export default function Home() {
             ) : (
               <button onClick={generateCode}>Generate</button>
             )}
-
           </div>
+        </div>
+      )}
 
-          <h2>{result}</h2>
+      {/* 💎 РЕЗУЛЬТАТ */}
+      {showResult && (
+        <div className="overlay">
+          <div className="resultBox">
+            <div className="bigEmoji">{result}</div>
 
+            <button
+              onClick={() => {
+                setShowResult(false);
+              }}
+            >
+              SPIN AGAIN
+            </button>
+          </div>
         </div>
       )}
 
@@ -171,7 +174,6 @@ export default function Home() {
           display: flex;
           justify-content: center;
           align-items: center;
-          flex-direction: column;
         }
 
         .sex {
@@ -184,10 +186,6 @@ export default function Home() {
           animation: pulse 1.2s infinite;
         }
 
-        @keyframes pulse {
-          50% { transform: scale(1.1); }
-        }
-
         .wrap {
           display: flex;
           flex-direction: column;
@@ -198,10 +196,6 @@ export default function Home() {
           width: 420px;
           height: 420px;
           border-radius: 50%;
-          position: relative;
-          margin-bottom: 30px;
-          transition: transform 4s ease-out;
-
           background: conic-gradient(
             #ff0055,
             #ffcc00,
@@ -210,8 +204,8 @@ export default function Home() {
             #7a00ff,
             #ff00cc
           );
-
-          box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+          position: relative;
+          transition: transform 4s ease-out;
         }
 
         .emoji {
@@ -232,6 +226,7 @@ export default function Home() {
         .controls {
           display: flex;
           gap: 10px;
+          margin-top: 20px;
           flex-wrap: wrap;
           justify-content: center;
         }
@@ -241,7 +236,6 @@ export default function Home() {
           border-radius: 10px;
           background: rgba(0,0,0,0.6);
           color: white;
-          border: 2px solid black;
         }
 
         button {
@@ -249,7 +243,28 @@ export default function Home() {
           border-radius: 10px;
           background: black;
           color: white;
-          border: 2px solid white;
+        }
+
+        /* 💎 overlay */
+        .overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .resultBox {
+          background: white;
+          padding: 40px;
+          border-radius: 20px;
+          text-align: center;
+        }
+
+        .bigEmoji {
+          font-size: 80px;
+          margin-bottom: 20px;
         }
       `}</style>
     </div>
