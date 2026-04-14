@@ -43,12 +43,14 @@ export default function Home() {
   return (
     <div className="container">
 
+      {/* 🔥 START */}
       {!started && (
         <button className="sex" onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
+      {/* 🎡 MAIN */}
       {started && (
         <div className="wrap">
 
@@ -60,23 +62,24 @@ export default function Home() {
             onClick={spin}
           >
 
-            {/* 💎 БЛЕСК */}
+            {/* ✨ блеск */}
             <div className="shine"></div>
 
-            {/* 🎯 СМАЙЛЫ */}
+            {/* 💥 ИДЕАЛЬНЫЕ СМАЙЛЫ */}
             {segments.map((emoji, i) => {
-              const angle = i * 60 + 30;
+              const angle = (i * 60 - 90) * (Math.PI / 180);
+              const radius = 140;
+
+              const x = Math.cos(angle) * radius;
+              const y = Math.sin(angle) * radius;
 
               return (
                 <div
                   key={i}
                   className="emoji"
                   style={{
-                    transform: `
-                      rotate(${angle}deg)
-                      translateY(-165px)
-                      rotate(-${angle}deg)
-                    `
+                    left: `calc(50% + ${x}px)`,
+                    top: `calc(50% + ${y}px)`
                   }}
                 >
                   {emoji}
@@ -87,6 +90,7 @@ export default function Home() {
             <div className="center"></div>
           </div>
 
+          {/* UI */}
           <input
             placeholder="Enter code"
             value={input}
@@ -95,6 +99,7 @@ export default function Home() {
 
           <button onClick={spin}>SPIN</button>
 
+          {/* ADMIN */}
           {!isAdmin ? (
             <>
               <input
@@ -122,6 +127,7 @@ export default function Home() {
         </div>
       )}
 
+      {/* 🎉 WIN */}
       {showWin && (
         <div className="overlay">
           <div className="win">
@@ -134,7 +140,7 @@ export default function Home() {
       <style jsx>{`
         .container {
           min-height: 100vh;
-          background: linear-gradient(135deg,#ff00aa,#ff66cc);
+          background: url("/bg.jpg") center/cover no-repeat;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -149,7 +155,6 @@ export default function Home() {
           color: white;
           border: 3px solid black;
           animation: pulse 1.2s infinite;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         @keyframes pulse {
@@ -197,15 +202,12 @@ export default function Home() {
             rgba(255,255,255,0.5),
             transparent 60%
           );
-          pointer-events: none;
         }
 
         .emoji {
           position: absolute;
-          top: 50%;
-          left: 50%;
           font-size: 34px;
-          transform-origin: center;
+          transform: translate(-50%, -50%);
         }
 
         .center {
@@ -243,11 +245,6 @@ export default function Home() {
           color: white;
         }
 
-        .code {
-          font-size: 20px;
-          font-weight: bold;
-        }
-
         .overlay {
           position: fixed;
           inset: 0;
@@ -266,7 +263,6 @@ export default function Home() {
           background: white;
           padding: 40px;
           border-radius: 20px;
-          text-align: center;
         }
       `}</style>
     </div>
