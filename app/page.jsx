@@ -11,6 +11,7 @@ import {
   doc
 } from "firebase/firestore";
 
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCMpMm3LaIQUDBeBZ13moUfC0uNtjev5jw",
   authDomain: "wheeeeloflove.firebaseapp.com",
@@ -31,22 +32,28 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
   const [showResult, setShowResult] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState("");
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPass, setAdminPass] = useState("");
 
-  // 🔥 генерация
+  // 🔥 генерация кода
   const generateCode = async () => {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    await addDoc(collection(db, "codes"), { code });
+    try {
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      await addDoc(collection(db, "codes"), { code });
+
+      setGeneratedCode(code); // показываем на экране
+    } catch (e) {
+      console.error(e);
+      setGeneratedCode("ERROR");
+    }
   };
 
   // 🎰 spin
   const spin = async () => {
     if (!input) return;
-
-    setLoading(true);
 
     const snapshot = await getDocs(collection(db, "codes"));
     let found = null;
@@ -55,10 +62,7 @@ export default function Home() {
       if (d.data().code === input) found = d;
     });
 
-    if (!found) {
-      setLoading(false);
-      return;
-    }
+    if (!found) return;
 
     await deleteDoc(doc(db, "codes", found.id));
 
@@ -71,10 +75,8 @@ export default function Home() {
     setResult(segments[index]);
     setInput("");
 
-    // ⏳ ждем пока колесо докрутится
     setTimeout(() => {
       setShowResult(true);
-      setLoading(false);
     }, 4000);
   };
 
@@ -93,7 +95,7 @@ export default function Home() {
           <div className="arrow"></div>
 
           <div
-            className={`wheel ${loading ? "spinning" : ""}`}
+            className="wheel"
             style={{ transform: `rotate(${rotation}deg)` }}
           >
             {segments.map((e, i) => {
@@ -116,6 +118,7 @@ export default function Home() {
           </div>
 
           <div className="controls">
+
             <input
               placeholder="Enter code"
               value={input}
@@ -144,23 +147,28 @@ export default function Home() {
                 </button>
               </>
             ) : (
-              <button onClick={generateCode}>Generate</button>
+              <>
+                <button onClick={generateCode}>Generate</button>
+
+                {generatedCode && (
+                  <div className="codeBox">
+                    CODE: {generatedCode}
+                  </div>
+                )}
+              </>
             )}
+
           </div>
         </div>
       )}
 
-      {/* 💎 РЕЗУЛЬТАТ */}
+      {/* 💎 результат */}
       {showResult && (
         <div className="overlay">
           <div className="resultBox">
             <div className="bigEmoji">{result}</div>
 
-            <button
-              onClick={() => {
-                setShowResult(false);
-              }}
-            >
+            <button onClick={() => setShowResult(false)}>
               SPIN AGAIN
             </button>
           </div>
@@ -184,6 +192,10 @@ export default function Home() {
           color: white;
           border: 3px solid black;
           animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+          50% { transform: scale(1.1); }
         }
 
         .wrap {
@@ -245,7 +257,14 @@ export default function Home() {
           color: white;
         }
 
-        /* 💎 overlay */
+        .codeBox {
+          margin-top: 10px;
+          color: white;
+          background: black;
+          padding: 10px;
+          border-radius: 10px;
+        }
+
         .overlay {
           position: fixed;
           inset: 0;
