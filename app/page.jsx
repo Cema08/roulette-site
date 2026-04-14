@@ -47,13 +47,11 @@ export default function Home() {
   return (
     <main className="min-h-screen flex items-center justify-center flex-col relative overflow-hidden">
 
-      {/* 🌸 ФОН (ТВОЯ КАРТИНКА) */}
+      {/* 🌸 ФОН */}
       <div
         className="absolute inset-0 -z-10 bg-cover bg-center"
         style={{ backgroundImage: "url('/bg.jpg')" }}
       />
-
-      {/* затемнение */}
       <div className="absolute inset-0 bg-black/10 -z-10" />
 
       {/* 🔥 START */}
@@ -76,17 +74,18 @@ export default function Home() {
             showWheel ? "opacity-100 scale-100" : "opacity-0 scale-75"
           }`}
         >
-          {/* колесо */}
           <div className="relative w-[650px] h-[650px]">
 
             {/* стрелка */}
             <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 z-10 w-0 h-0 border-l-[20px] border-r-[20px] border-b-[30px] border-l-transparent border-r-transparent border-b-black"></div>
 
+            {/* колесо */}
             <div
               onClick={spin}
               className="w-full h-full rounded-full border-[14px] border-black shadow-2xl flex items-center justify-center relative cursor-pointer"
               style={{
                 transform: `rotate(${rotation}deg)`,
+                willChange: "transform",
                 transition: "transform 4s cubic-bezier(0.25,1,0.5,1)",
                 background: `
                   conic-gradient(
@@ -100,6 +99,7 @@ export default function Home() {
                 `
               }}
             >
+              {/* СМАЙЛЫ — ФИКС */}
               {prizes.map((emoji, i) => {
                 const angle = i * 60 + 30;
                 return (
@@ -107,7 +107,15 @@ export default function Home() {
                     key={i}
                     className="absolute text-4xl"
                     style={{
-                      transform: `rotate(${angle}deg) translate(0, -220px) rotate(-${angle}deg)`
+                      top: "50%",
+                      left: "50%",
+                      transform: `
+                        rotate(${angle}deg)
+                        translate(-50%, -50%)
+                        translateY(-240px)
+                        rotate(-${angle}deg)
+                      `,
+                      transformOrigin: "center"
                     }}
                   >
                     {emoji}
@@ -115,6 +123,7 @@ export default function Home() {
                 );
               })}
 
+              {/* центр */}
               <div className="absolute w-24 h-24 bg-yellow-400 rounded-full border-4 border-black flex items-center justify-center">
                 🎡
               </div>
@@ -138,7 +147,7 @@ export default function Home() {
               Spin
             </button>
 
-            {/* admin */}
+            {/* ADMIN */}
             <div className="mt-4 flex flex-col items-center gap-2">
 
               <input
