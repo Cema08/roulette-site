@@ -1,14 +1,7 @@
 "use client";
 import { useState } from "react";
 
-const segments = [
-  { emoji: "🎉", color: "#ff4d6d" },
-  { emoji: "🎁", color: "#f9c74f" },
-  { emoji: "💰", color: "#43aa8b" },
-  { emoji: "🔥", color: "#f3722c" },
-  { emoji: "⭐", color: "#577590" },
-  { emoji: "🍀", color: "#9b5de5" },
-];
+const segments = ["🎉","🎁","💰","🔥","⭐","🍀"];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
@@ -21,8 +14,6 @@ export default function Home() {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminPass, setAdminPass] = useState("");
-
-  const ADMIN_PASS = "admin123";
 
   const generateCode = () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -38,10 +29,10 @@ export default function Home() {
     const index = Math.floor(Math.random() * segments.length);
     const angle = 360 / segments.length;
 
-    const final = rotation + 360 * 6 + index * angle;
+    const final = rotation + 360 * 6 + (360 - index * angle);
 
     setRotation(final);
-    setResult(segments[index].emoji);
+    setResult(segments[index]);
 
     setCode("");
     setInput("");
@@ -52,36 +43,43 @@ export default function Home() {
   return (
     <div className="container">
 
+      {/* START */}
       {!started && (
         <button className="sex" onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
+      {/* MAIN */}
       {started && (
-        <div className="wheel-container">
+        <div className="wrap">
 
-          {/* стрелка */}
           <div className="arrow"></div>
 
-          {/* колесо */}
           <div
             className="wheel"
-            onClick={spin}
             style={{ transform: `rotate(${rotation}deg)` }}
+            onClick={spin}
           >
-            {segments.map((seg, i) => (
-              <div
-                key={i}
-                className="segment"
-                style={{
-                  background: seg.color,
-                  transform: `rotate(${i * 60}deg)`
-                }}
-              >
-                <span className="emoji">{seg.emoji}</span>
-              </div>
-            ))}
+            {/* EMOJIS */}
+            {segments.map((emoji, i) => {
+              const angle = i * 60 + 30;
+              return (
+                <div
+                  key={i}
+                  className="emoji"
+                  style={{
+                    transform: `
+                      rotate(${angle}deg)
+                      translateY(-180px)
+                      rotate(-${angle}deg)
+                    `
+                  }}
+                >
+                  {emoji}
+                </div>
+              );
+            })}
 
             <div className="center"></div>
           </div>
@@ -95,6 +93,7 @@ export default function Home() {
 
           <button onClick={spin}>SPIN</button>
 
+          {/* ADMIN */}
           {!isAdmin ? (
             <>
               <input
@@ -103,9 +102,10 @@ export default function Home() {
                 value={adminPass}
                 onChange={(e) => setAdminPass(e.target.value)}
               />
+
               <button
                 onClick={() => {
-                  if (adminPass === ADMIN_PASS) setIsAdmin(true);
+                  if (adminPass === "admin123") setIsAdmin(true);
                   else alert("Wrong password");
                 }}
               >
@@ -115,12 +115,13 @@ export default function Home() {
           ) : (
             <>
               <button onClick={generateCode}>Generate code</button>
-              {code && <div>{code}</div>}
+              {code && <div className="code">{code}</div>}
             </>
           )}
         </div>
       )}
 
+      {/* RESULT */}
       {showWin && (
         <div className="overlay">
           <div className="win">
@@ -133,14 +134,13 @@ export default function Home() {
       <style jsx>{`
         .container {
           min-height: 100vh;
-          background: linear-gradient(135deg,#ff9ad5,#fd58e7);
+          background: linear-gradient(135deg,#ff00aa,#ff66cc);
           display: flex;
           align-items: center;
           justify-content: center;
           flex-direction: column;
         }
 
-        /* SEX BUTTON */
         .sex {
           font-size: 50px;
           padding: 30px 90px;
@@ -149,7 +149,6 @@ export default function Home() {
           color: white;
           border: 3px solid black;
           animation: pulse 1.2s infinite;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         @keyframes pulse {
@@ -158,16 +157,10 @@ export default function Home() {
           100% { transform: scale(1); }
         }
 
-        .wheel-container {
-          animation: fadeIn 0.7s ease;
+        .wrap {
           display: flex;
           flex-direction: column;
           align-items: center;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.8); }
-          to { opacity: 1; transform: scale(1); }
         }
 
         .wheel {
@@ -176,39 +169,37 @@ export default function Home() {
           border-radius: 50%;
           border: 12px solid black;
           position: relative;
-          overflow: hidden;
-          transition: transform 4s cubic-bezier(.2,.8,.2,1);
           margin-bottom: 20px;
-        }
+          transition: transform 4s cubic-bezier(.2,.8,.2,1);
 
-        .segment {
-          position: absolute;
-          width: 50%;
-          height: 50%;
-          top: 50%;
-          left: 50%;
-          transform-origin: 0% 0%;
-          clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          background: conic-gradient(
+            #ff0055 0deg 60deg,
+            #ffcc00 60deg 120deg,
+            #00ff88 120deg 180deg,
+            #00c3ff 180deg 240deg,
+            #7a00ff 240deg 300deg,
+            #ff00cc 300deg 360deg
+          );
         }
 
         .emoji {
-          transform: rotate(30deg);
-          font-size: 28px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          font-size: 32px;
+          transform-origin: center;
         }
 
         .center {
           position: absolute;
-          width: 60px;
-          height: 60px;
+          width: 70px;
+          height: 70px;
           background: gold;
           border-radius: 50%;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          border: 3px solid black;
+          border: 4px solid black;
         }
 
         .arrow {
@@ -232,6 +223,11 @@ export default function Home() {
           border-radius: 10px;
           background: black;
           color: white;
+        }
+
+        .code {
+          font-size: 20px;
+          font-weight: bold;
         }
 
         .overlay {
