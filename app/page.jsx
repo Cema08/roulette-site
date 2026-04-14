@@ -1,222 +1,219 @@
 "use client";
 import { useState } from "react";
 
+const emojis = ["🎉", "🎁", "💰", "🔥", "⭐", "🍀"];
+
 export default function Home() {
   const [started, setStarted] = useState(false);
-  const [showWheel, setShowWheel] = useState(false);
-
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState("");
-  const [showResult, setShowResult] = useState(false);
-
-  const [code, setCode] = useState("");
-  const [input, setInput] = useState("");
-
+  const [codeInput, setCodeInput] = useState("");
+  const [codes, setCodes] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminPass, setAdminPass] = useState("");
+  const [showWin, setShowWin] = useState(false);
 
-  const prizes = ["🎁", "💰", "🔥", "🍀", "⭐", "🎉"];
+  const ADMIN_PASSWORD = "admin123";
 
   const generateCode = () => {
-    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setCode(newCode);
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setCodes([...codes, code]);
   };
 
   const spin = () => {
-    if (!input || input !== code) {
-      alert("Enter a valid code");
+    if (!codes.includes(codeInput)) {
+      alert("Invalid code");
       return;
     }
 
-    const index = Math.floor(Math.random() * prizes.length);
+    const index = Math.floor(Math.random() * emojis.length);
+    const angle = 360 / emojis.length;
+    const finalRotation = 360 * 5 + index * angle;
 
-    const newRotation =
-      rotation + 360 * 6 + (360 - index * (360 / prizes.length));
+    setRotation(finalRotation);
+    setResult(emojis[index]);
 
-    setRotation(newRotation);
+    setCodes(codes.filter(c => c !== codeInput));
+    setCodeInput("");
 
     setTimeout(() => {
-      setResult(prizes[index]);
-      setShowResult(true);
-    }, 4000);
-
-    setCode("");
-    setInput("");
+      setShowWin(true);
+    }, 3000);
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center flex-col relative overflow-hidden">
-
-      {/* 🌸 ФОН (ТВОЯ КАРТИНКА) */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: "url('/bg.jpg')" }}
-      />
-
-      {/* затемнение */}
-      <div className="absolute inset-0 bg-black/10 -z-10" />
-
-      {/* 🔥 START */}
-      {!started && (
-        <button
-          onClick={() => {
-            setStarted(true);
-            setTimeout(() => setShowWheel(true), 300);
-          }}
-          className="sex-btn"
-        >
+    <div style={styles.container}>
+      {!started ? (
+        <button style={styles.startBtn} onClick={() => setStarted(true)}>
           SEX
         </button>
-      )}
-
-      {/* 🎡 WHEEL */}
-      {started && (
-        <div
-          className={`flex flex-col items-center transition-all duration-700 ${
-            showWheel ? "opacity-100 scale-100" : "opacity-0 scale-75"
-          }`}
-        >
-          {/* колесо */}
-          <div className="relative w-[650px] h-[650px]">
-
-            {/* стрелка */}
-            <div className="absolute top-[-30px] left-1/2 -translate-x-1/2 z-10 w-0 h-0 border-l-[20px] border-r-[20px] border-b-[30px] border-l-transparent border-r-transparent border-b-black"></div>
-
-            <div
-              onClick={spin}
-              className="w-full h-full rounded-full border-[14px] border-black shadow-2xl flex items-center justify-center relative cursor-pointer"
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                transition: "transform 4s cubic-bezier(0.25,1,0.5,1)",
-                background: `
-                  conic-gradient(
-                    #ff4d6d 0deg 60deg,
-                    #ffd166 60deg 120deg,
-                    #06d6a0 120deg 180deg,
-                    #118ab2 180deg 240deg,
-                    #9b5de5 240deg 300deg,
-                    #f15bb5 300deg 360deg
-                  )
-                `
-              }}
-            >
-              {prizes.map((emoji, i) => {
-                const angle = i * 60 + 30;
-                return (
-                  <div
-                    key={i}
-                    className="absolute text-4xl"
-                    style={{
-                      transform: `rotate(${angle}deg) translate(0, -220px) rotate(-${angle}deg)`
-                    }}
-                  >
-                    {emoji}
-                  </div>
-                );
-              })}
-
-              <div className="absolute w-24 h-24 bg-yellow-400 rounded-full border-4 border-black flex items-center justify-center">
-                🎡
-              </div>
-            </div>
-          </div>
-
-          {/* UI */}
-          <div className="mt-8 flex flex-col items-center gap-4">
-
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter code"
-              className="px-6 py-3 rounded-xl border-2 border-black bg-white text-black"
-            />
-
-            <button
-              onClick={spin}
-              className="px-10 py-3 bg-black text-white rounded-xl hover:scale-105 transition"
-            >
-              Spin
-            </button>
-
-            {/* admin */}
-            <div className="mt-4 flex flex-col items-center gap-2">
-
-              <input
-                type="password"
-                placeholder="Admin password"
-                value={adminPass}
-                onChange={(e) => setAdminPass(e.target.value)}
-                className="px-4 py-2 border-2 border-black rounded-xl bg-white text-black"
-              />
-
-              <button
-                onClick={() => {
-                  if (adminPass === "admin123") setIsAdmin(true);
-                  else alert("Wrong password");
-                }}
-                className="bg-black text-white px-6 py-2 rounded-xl"
-              >
-                Login as admin
-              </button>
-
-              {isAdmin && (
-                <>
-                  <button
-                    onClick={generateCode}
-                    className="bg-green-500 text-white px-6 py-2 rounded-xl"
-                  >
-                    Generate code
-                  </button>
-
-                  {code && <div className="text-black font-bold">{code}</div>}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 🎉 RESULT */}
-      {showResult && (
-        <div className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-50">
-
-          <div className="text-[120px] mb-6 animate-bounce">
-            {result}
-          </div>
-
-          <button
-            onClick={() => {
-              setShowResult(false);
-              setResult("");
+      ) : (
+        <>
+          <div
+            style={{
+              ...styles.wheel,
+              transform: `rotate(${rotation}deg)`
             }}
-            className="px-10 py-4 bg-white text-black rounded-xl text-xl hover:scale-110 transition"
+            onClick={spin}
           >
-            Spin again
+            {emojis.map((e, i) => (
+              <div
+                key={i}
+                style={{
+                  ...styles.segment,
+                  transform: `rotate(${i * 60}deg)`
+                }}
+              >
+                <span style={styles.emoji}>{e}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={styles.arrow}></div>
+
+          <input
+            placeholder="Enter code"
+            value={codeInput}
+            onChange={e => setCodeInput(e.target.value)}
+            style={styles.input}
+          />
+
+          <button onClick={spin} style={styles.spinBtn}>
+            Spin
           </button>
 
-        </div>
+          <div style={styles.result}>
+            Result: {result}
+          </div>
+
+          <hr style={{ margin: "30px 0", width: "200px" }} />
+
+          {!isAdmin ? (
+            <>
+              <input
+                placeholder="Admin password"
+                onChange={e => {
+                  if (e.target.value === ADMIN_PASSWORD) {
+                    setIsAdmin(true);
+                  }
+                }}
+                style={styles.input}
+              />
+            </>
+          ) : (
+            <div>
+              <button onClick={generateCode} style={styles.adminBtn}>
+                Generate Code
+              </button>
+              <div>{codes.join(", ")}</div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* стили */}
-      <style jsx>{`
-        .sex-btn {
-          font-size: 40px;
-          font-weight: bold;
-          padding: 30px 80px;
-          border-radius: 30px;
-          background: linear-gradient(145deg, #ff4fd8, #ff008c);
-          color: white;
-          border: 2px solid black;
-          animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-      `}</style>
-
-    </main>
+      {showWin && (
+        <div style={styles.overlay}>
+          <div style={styles.winBox}>
+            <h1 style={{ fontSize: "80px" }}>{result}</h1>
+            <button
+              onClick={() => setShowWin(false)}
+              style={styles.spinBtn}
+            >
+              Spin Again
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
+
+const styles = {
+  container: {
+    textAlign: "center",
+    minHeight: "100vh",
+    background: "linear-gradient(135deg,#ff9ad5,#fd58e7)",
+    paddingTop: "50px"
+  },
+  startBtn: {
+    padding: "30px 80px",
+    fontSize: "40px",
+    borderRadius: "20px",
+    border: "2px solid black",
+    background: "#ff00aa",
+    color: "white",
+    cursor: "pointer",
+    animation: "pulse 1s infinite"
+  },
+  wheel: {
+    width: "400px",
+    height: "400px",
+    borderRadius: "50%",
+    border: "10px solid black",
+    margin: "auto",
+    position: "relative",
+    transition: "transform 3s ease-out",
+    overflow: "hidden"
+  },
+  segment: {
+    position: "absolute",
+    width: "50%",
+    height: "50%",
+    background: "rgba(255,255,255,0.2)",
+    transformOrigin: "100% 100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  emoji: {
+    fontSize: "30px"
+  },
+  arrow: {
+    width: 0,
+    height: 0,
+    borderLeft: "15px solid transparent",
+    borderRight: "15px solid transparent",
+    borderBottom: "30px solid black",
+    margin: "20px auto"
+  },
+  input: {
+    padding: "10px",
+    marginTop: "10px",
+    borderRadius: "10px",
+    border: "1px solid black"
+  },
+  spinBtn: {
+    marginTop: "10px",
+    padding: "10px 20px",
+    background: "black",
+    color: "white",
+    borderRadius: "10px",
+    cursor: "pointer"
+  },
+  adminBtn: {
+    padding: "10px 20px",
+    background: "green",
+    color: "white",
+    borderRadius: "10px",
+    cursor: "pointer"
+  },
+  result: {
+    marginTop: "20px",
+    fontSize: "20px"
+  },
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "rgba(0,0,0,0.7)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  winBox: {
+    background: "white",
+    padding: "50px",
+    borderRadius: "20px"
+  }
+};
