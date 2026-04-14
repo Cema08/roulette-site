@@ -1,59 +1,65 @@
 "use client";
 import { useState } from "react";
 
-const segments = [
-  { emoji: "🎉", color: "#ff4d6d" },
-  { emoji: "🎁", color: "#f9c74f" },
-  { emoji: "💰", color: "#43aa8b" },
-  { emoji: "🔥", color: "#f3722c" },
-  { emoji: "⭐", color: "#577590" },
-  { emoji: "🍀", color: "#9b5de5" },
-];
+const segments = ["🎉", "🎁", "💰", "🔥", "⭐", "🍀"];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState("");
-  const [codeInput, setCodeInput] = useState("");
   const [codes, setCodes] = useState([]);
+  const [input, setInput] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [showWin, setShowWin] = useState(false);
 
-  const ADMIN_PASSWORD = "admin123";
+  const ADMIN_PASS = "admin123";
 
+  // 🎯 генерация кода
   const generateCode = () => {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setCodes([...codes, code]);
+    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    setCodes([...codes, newCode]);
   };
 
+  // 🎰 крутка
   const spin = () => {
-    if (!codes.includes(codeInput)) {
+    if (!codes.includes(input)) {
       alert("Invalid code");
       return;
     }
 
     const index = Math.floor(Math.random() * segments.length);
     const angle = 360 / segments.length;
-    const finalRotation = rotation + 360 * 5 + index * angle;
 
-    setRotation(finalRotation);
-    setResult(segments[index].emoji);
+    const final = rotation + 360 * 5 + index * angle;
 
-    setCodes(codes.filter(c => c !== codeInput));
-    setCodeInput("");
+    setRotation(final);
+    setResult(segments[index]);
+
+    setCodes(codes.filter(c => c !== input));
+    setInput("");
 
     setTimeout(() => setShowWin(true), 3500);
   };
 
   return (
     <div style={styles.container}>
-      {!started ? (
-        <button style={styles.startBtn} onClick={() => setStarted(true)}>
+
+      {/* 🔥 START */}
+      {!started && (
+        <button style={styles.sexBtn} onClick={() => setStarted(true)}>
           SEX
         </button>
-      ) : (
+      )}
+
+      {/* 🎡 MAIN */}
+      {started && (
         <>
           <div style={styles.wheelWrapper}>
+
+            {/* стрелка */}
+            <div style={styles.arrow}></div>
+
+            {/* колесо */}
             <div
               style={{
                 ...styles.wheel,
@@ -61,27 +67,26 @@ export default function Home() {
               }}
               onClick={spin}
             >
-              {segments.map((seg, i) => (
+              {segments.map((emoji, i) => (
                 <div
                   key={i}
                   style={{
                     ...styles.segment,
-                    background: seg.color,
-                    transform: `rotate(${i * (360 / segments.length)}deg)`
+                    background: colors[i],
+                    transform: `rotate(${i * 60}deg)`
                   }}
                 >
-                  <span style={styles.emoji}>{seg.emoji}</span>
+                  <span style={styles.emoji}>{emoji}</span>
                 </div>
               ))}
             </div>
-
-            <div style={styles.arrow}></div>
           </div>
 
+          {/* ввод кода */}
           <input
             placeholder="Enter code"
-            value={codeInput}
-            onChange={e => setCodeInput(e.target.value)}
+            value={input}
+            onChange={e => setInput(e.target.value)}
             style={styles.input}
           />
 
@@ -89,15 +94,12 @@ export default function Home() {
             SPIN
           </button>
 
-          <div style={styles.result}>{result}</div>
-
+          {/* админ */}
           {!isAdmin ? (
             <input
               placeholder="Admin password"
               onChange={e => {
-                if (e.target.value === ADMIN_PASSWORD) {
-                  setIsAdmin(true);
-                }
+                if (e.target.value === ADMIN_PASS) setIsAdmin(true);
               }}
               style={styles.input}
             />
@@ -106,20 +108,18 @@ export default function Home() {
               <button onClick={generateCode} style={styles.adminBtn}>
                 Generate Code
               </button>
-              <div style={{ color: "white" }}>{codes.join(" , ")}</div>
+              <div style={{ color: "white" }}>{codes.join(", ")}</div>
             </>
           )}
         </>
       )}
 
+      {/* 🎉 WIN SCREEN */}
       {showWin && (
         <div style={styles.overlay}>
           <div style={styles.winBox}>
             <h1 style={{ fontSize: "100px" }}>{result}</h1>
-            <button
-              onClick={() => setShowWin(false)}
-              style={styles.spinBtn}
-            >
+            <button onClick={() => setShowWin(false)} style={styles.spinBtn}>
               SPIN AGAIN
             </button>
           </div>
@@ -129,37 +129,50 @@ export default function Home() {
   );
 }
 
+const colors = [
+  "#ff4d6d",
+  "#f9c74f",
+  "#43aa8b",
+  "#f3722c",
+  "#577590",
+  "#9b5de5"
+];
+
 const styles = {
   container: {
     minHeight: "100vh",
     textAlign: "center",
-    background: "linear-gradient(135deg,#ff9ad5,#fd58e7)",
+    background: "#fd58e7",
     paddingTop: "40px"
   },
-  startBtn: {
+
+  sexBtn: {
     padding: "30px 80px",
     fontSize: "40px",
-    borderRadius: "20px",
+    borderRadius: "25px",
     border: "2px solid black",
     background: "#ff00aa",
     color: "white",
     cursor: "pointer",
-    animation: "pulse 1s infinite"
+    animation: "pulse 1.2s infinite"
   },
+
   wheelWrapper: {
     position: "relative",
-    width: "400px",
+    width: "420px",
     margin: "auto"
   },
+
   wheel: {
-    width: "400px",
-    height: "400px",
+    width: "420px",
+    height: "420px",
     borderRadius: "50%",
-    border: "10px solid black",
+    border: "12px solid black",
     position: "relative",
     overflow: "hidden",
-    transition: "transform 3.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)"
+    transition: "transform 3.5s cubic-bezier(0.2,0.8,0.2,1)"
   },
+
   segment: {
     position: "absolute",
     width: "50%",
@@ -172,26 +185,30 @@ const styles = {
     alignItems: "center",
     justifyContent: "center"
   },
+
   emoji: {
     transform: "rotate(30deg)",
     fontSize: "30px"
   },
+
   arrow: {
     position: "absolute",
-    top: "-20px",
+    top: "-25px",
     left: "50%",
     transform: "translateX(-50%)",
     width: 0,
     height: 0,
-    borderLeft: "15px solid transparent",
-    borderRight: "15px solid transparent",
-    borderBottom: "30px solid black"
+    borderLeft: "20px solid transparent",
+    borderRight: "20px solid transparent",
+    borderBottom: "35px solid black"
   },
+
   input: {
     marginTop: "15px",
-    padding: "10px",
+    padding: "12px",
     borderRadius: "10px"
   },
+
   spinBtn: {
     marginTop: "10px",
     padding: "12px 30px",
@@ -200,6 +217,7 @@ const styles = {
     borderRadius: "10px",
     cursor: "pointer"
   },
+
   adminBtn: {
     marginTop: "10px",
     padding: "10px 20px",
@@ -207,11 +225,7 @@ const styles = {
     color: "white",
     borderRadius: "10px"
   },
-  result: {
-    marginTop: "20px",
-    fontSize: "25px",
-    color: "white"
-  },
+
   overlay: {
     position: "fixed",
     top: 0,
@@ -223,6 +237,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center"
   },
+
   winBox: {
     background: "white",
     padding: "60px",
