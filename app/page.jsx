@@ -1,7 +1,14 @@
 "use client";
 import { useState } from "react";
 
-const emojis = ["🎉", "🎁", "💰", "🔥", "⭐", "🍀"];
+const segments = [
+  { emoji: "🎉", color: "#ff4d6d" },
+  { emoji: "🎁", color: "#f9c74f" },
+  { emoji: "💰", color: "#43aa8b" },
+  { emoji: "🔥", color: "#f3722c" },
+  { emoji: "⭐", color: "#577590" },
+  { emoji: "🍀", color: "#9b5de5" },
+];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
@@ -25,19 +32,17 @@ export default function Home() {
       return;
     }
 
-    const index = Math.floor(Math.random() * emojis.length);
-    const angle = 360 / emojis.length;
-    const finalRotation = 360 * 5 + index * angle;
+    const index = Math.floor(Math.random() * segments.length);
+    const angle = 360 / segments.length;
+    const finalRotation = rotation + 360 * 5 + index * angle;
 
     setRotation(finalRotation);
-    setResult(emojis[index]);
+    setResult(segments[index].emoji);
 
     setCodes(codes.filter(c => c !== codeInput));
     setCodeInput("");
 
-    setTimeout(() => {
-      setShowWin(true);
-    }, 3000);
+    setTimeout(() => setShowWin(true), 3500);
   };
 
   return (
@@ -48,27 +53,30 @@ export default function Home() {
         </button>
       ) : (
         <>
-          <div
-            style={{
-              ...styles.wheel,
-              transform: `rotate(${rotation}deg)`
-            }}
-            onClick={spin}
-          >
-            {emojis.map((e, i) => (
-              <div
-                key={i}
-                style={{
-                  ...styles.segment,
-                  transform: `rotate(${i * 60}deg)`
-                }}
-              >
-                <span style={styles.emoji}>{e}</span>
-              </div>
-            ))}
-          </div>
+          <div style={styles.wheelWrapper}>
+            <div
+              style={{
+                ...styles.wheel,
+                transform: `rotate(${rotation}deg)`
+              }}
+              onClick={spin}
+            >
+              {segments.map((seg, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.segment,
+                    background: seg.color,
+                    transform: `rotate(${i * (360 / segments.length)}deg)`
+                  }}
+                >
+                  <span style={styles.emoji}>{seg.emoji}</span>
+                </div>
+              ))}
+            </div>
 
-          <div style={styles.arrow}></div>
+            <div style={styles.arrow}></div>
+          </div>
 
           <input
             placeholder="Enter code"
@@ -78,34 +86,28 @@ export default function Home() {
           />
 
           <button onClick={spin} style={styles.spinBtn}>
-            Spin
+            SPIN
           </button>
 
-          <div style={styles.result}>
-            Result: {result}
-          </div>
-
-          <hr style={{ margin: "30px 0", width: "200px" }} />
+          <div style={styles.result}>{result}</div>
 
           {!isAdmin ? (
-            <>
-              <input
-                placeholder="Admin password"
-                onChange={e => {
-                  if (e.target.value === ADMIN_PASSWORD) {
-                    setIsAdmin(true);
-                  }
-                }}
-                style={styles.input}
-              />
-            </>
+            <input
+              placeholder="Admin password"
+              onChange={e => {
+                if (e.target.value === ADMIN_PASSWORD) {
+                  setIsAdmin(true);
+                }
+              }}
+              style={styles.input}
+            />
           ) : (
-            <div>
+            <>
               <button onClick={generateCode} style={styles.adminBtn}>
                 Generate Code
               </button>
-              <div>{codes.join(", ")}</div>
-            </div>
+              <div style={{ color: "white" }}>{codes.join(" , ")}</div>
+            </>
           )}
         </>
       )}
@@ -113,12 +115,12 @@ export default function Home() {
       {showWin && (
         <div style={styles.overlay}>
           <div style={styles.winBox}>
-            <h1 style={{ fontSize: "80px" }}>{result}</h1>
+            <h1 style={{ fontSize: "100px" }}>{result}</h1>
             <button
               onClick={() => setShowWin(false)}
               style={styles.spinBtn}
             >
-              Spin Again
+              SPIN AGAIN
             </button>
           </div>
         </div>
@@ -129,10 +131,10 @@ export default function Home() {
 
 const styles = {
   container: {
-    textAlign: "center",
     minHeight: "100vh",
+    textAlign: "center",
     background: "linear-gradient(135deg,#ff9ad5,#fd58e7)",
-    paddingTop: "50px"
+    paddingTop: "40px"
   },
   startBtn: {
     padding: "30px 80px",
@@ -144,61 +146,71 @@ const styles = {
     cursor: "pointer",
     animation: "pulse 1s infinite"
   },
+  wheelWrapper: {
+    position: "relative",
+    width: "400px",
+    margin: "auto"
+  },
   wheel: {
     width: "400px",
     height: "400px",
     borderRadius: "50%",
     border: "10px solid black",
-    margin: "auto",
     position: "relative",
-    transition: "transform 3s ease-out",
-    overflow: "hidden"
+    overflow: "hidden",
+    transition: "transform 3.5s cubic-bezier(0.17, 0.67, 0.83, 0.67)"
   },
   segment: {
     position: "absolute",
     width: "50%",
     height: "50%",
-    background: "rgba(255,255,255,0.2)",
-    transformOrigin: "100% 100%",
+    top: "50%",
+    left: "50%",
+    transformOrigin: "0% 0%",
+    clipPath: "polygon(0% 0%, 100% 0%, 0% 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center"
   },
   emoji: {
+    transform: "rotate(30deg)",
     fontSize: "30px"
   },
   arrow: {
+    position: "absolute",
+    top: "-20px",
+    left: "50%",
+    transform: "translateX(-50%)",
     width: 0,
     height: 0,
     borderLeft: "15px solid transparent",
     borderRight: "15px solid transparent",
-    borderBottom: "30px solid black",
-    margin: "20px auto"
+    borderBottom: "30px solid black"
   },
   input: {
+    marginTop: "15px",
     padding: "10px",
-    marginTop: "10px",
-    borderRadius: "10px",
-    border: "1px solid black"
+    borderRadius: "10px"
   },
   spinBtn: {
     marginTop: "10px",
-    padding: "10px 20px",
+    padding: "12px 30px",
     background: "black",
     color: "white",
     borderRadius: "10px",
     cursor: "pointer"
   },
   adminBtn: {
+    marginTop: "10px",
     padding: "10px 20px",
     background: "green",
     color: "white",
-    borderRadius: "10px",
-    cursor: "pointer"
+    borderRadius: "10px"
   },
   result: {
     marginTop: "20px",
-    fontSize: "20px"
+    fontSize: "25px",
+    color: "white"
   },
   overlay: {
     position: "fixed",
@@ -206,14 +218,14 @@ const styles = {
     left: 0,
     width: "100%",
     height: "100%",
-    background: "rgba(0,0,0,0.7)",
+    background: "rgba(0,0,0,0.8)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center"
   },
   winBox: {
     background: "white",
-    padding: "50px",
+    padding: "60px",
     borderRadius: "20px"
   }
 };
