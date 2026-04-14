@@ -24,35 +24,34 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🎡 секции
+// 🎡
 const segments = ["🎉","🎁","💰","🔥","⭐","🍀"];
 
 export default function Home() {
   const [started, setStarted] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [input, setInput] = useState("");
-  const [result, setResult] = useState("");
+  const [result, setResult] = "";
 
-  // 👉 временно всегда админ (чтобы работало)
-  const isAdmin = true;
+  // 🔐 админ
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPass, setAdminPass] = useState("");
 
-  // 🔥 генерация кода
+  // 🔥 генерация
   const generateCode = async () => {
     try {
-      const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-      await addDoc(collection(db, "codes"), {
-        code: newCode
-      });
+      await addDoc(collection(db, "codes"), { code });
 
-      alert("CODE: " + newCode);
+      alert("CODE: " + code);
     } catch (e) {
-      alert("Firebase error");
-      console.error(e);
+      alert("Firebase ERROR");
+      console.log(e);
     }
   };
 
-  // 🎰 крутка
+  // 🎰 spin
   const spin = async () => {
     try {
       const snapshot = await getDocs(collection(db, "codes"));
@@ -72,8 +71,8 @@ export default function Home() {
 
       await deleteDoc(doc(db, "codes", found.id));
 
-      const index = Math.floor(Math.random() * segments.length);
-      const angle = 360 / segments.length;
+      const index = Math.floor(Math.random() * 6);
+      const angle = 360 / 6;
 
       const final = rotation + 360 * 6 + (360 - index * angle);
 
@@ -83,21 +82,18 @@ export default function Home() {
 
     } catch (e) {
       alert("Spin error");
-      console.error(e);
     }
   };
 
   return (
     <div className="container">
 
-      {/* 🔥 СТАРТ */}
       {!started && (
         <button className="sex" onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
-      {/* 🎡 ОСНОВА */}
       {started && (
         <div className="wrap">
 
@@ -107,8 +103,8 @@ export default function Home() {
             className="wheel"
             style={{ transform: `rotate(${rotation}deg)` }}
           >
-            {segments.map((emoji, i) => {
-              const angle = (i * 60 - 90) * (Math.PI / 180);
+            {segments.map((e, i) => {
+              const angle = (i * 60 - 90) * Math.PI / 180;
               const r = 150;
 
               return (
@@ -120,13 +116,14 @@ export default function Home() {
                     top: `calc(50% + ${Math.sin(angle) * r}px)`
                   }}
                 >
-                  {emoji}
+                  {e}
                 </div>
               );
             })}
           </div>
 
           <div className="controls">
+
             <input
               placeholder="Enter code"
               value={input}
@@ -135,9 +132,31 @@ export default function Home() {
 
             <button onClick={spin}>SPIN</button>
 
-            {isAdmin && (
+            {!isAdmin ? (
+              <>
+                <input
+                  type="password"
+                  placeholder="Admin password"
+                  value={adminPass}
+                  onChange={(e) => setAdminPass(e.target.value)}
+                />
+
+                <button
+                  onClick={() => {
+                    if (adminPass === "admin123") {
+                      setIsAdmin(true);
+                    } else {
+                      alert("Wrong password");
+                    }
+                  }}
+                >
+                  Login
+                </button>
+              </>
+            ) : (
               <button onClick={generateCode}>Generate</button>
             )}
+
           </div>
 
           <h2>{result}</h2>
@@ -166,9 +185,7 @@ export default function Home() {
         }
 
         @keyframes pulse {
-          0% { transform: scale(1); }
           50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
         }
 
         .wrap {
@@ -186,17 +203,15 @@ export default function Home() {
           transition: transform 4s ease-out;
 
           background: conic-gradient(
-            #ff0055 0deg 60deg,
-            #ffcc00 60deg 120deg,
-            #00ff88 120deg 180deg,
-            #00c3ff 180deg 240deg,
-            #7a00ff 240deg 300deg,
-            #ff00cc 300deg 360deg
+            #ff0055,
+            #ffcc00,
+            #00ff88,
+            #00c3ff,
+            #7a00ff,
+            #ff00cc
           );
 
-          box-shadow:
-            inset 0 0 40px rgba(255,255,255,0.3),
-            0 15px 30px rgba(0,0,0,0.4);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.4);
         }
 
         .emoji {
@@ -217,15 +232,16 @@ export default function Home() {
         .controls {
           display: flex;
           gap: 10px;
-          margin-top: 10px;
+          flex-wrap: wrap;
+          justify-content: center;
         }
 
         input {
           padding: 10px;
           border-radius: 10px;
-          border: 2px solid black;
           background: rgba(0,0,0,0.6);
           color: white;
+          border: 2px solid black;
         }
 
         button {
