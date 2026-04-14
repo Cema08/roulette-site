@@ -43,14 +43,12 @@ export default function Home() {
   return (
     <div className="container">
 
-      {/* START */}
       {!started && (
         <button className="sex" onClick={() => setStarted(true)}>
           SEX
         </button>
       )}
 
-      {/* MAIN */}
       {started && (
         <div className="wrap">
 
@@ -61,9 +59,14 @@ export default function Home() {
             style={{ transform: `rotate(${rotation}deg)` }}
             onClick={spin}
           >
-            {/* EMOJIS */}
+
+            {/* 💎 БЛЕСК */}
+            <div className="shine"></div>
+
+            {/* 🎯 СМАЙЛЫ */}
             {segments.map((emoji, i) => {
               const angle = i * 60 + 30;
+
               return (
                 <div
                   key={i}
@@ -71,7 +74,7 @@ export default function Home() {
                   style={{
                     transform: `
                       rotate(${angle}deg)
-                      translateY(-180px)
+                      translateY(-165px)
                       rotate(-${angle}deg)
                     `
                   }}
@@ -84,7 +87,6 @@ export default function Home() {
             <div className="center"></div>
           </div>
 
-          {/* UI */}
           <input
             placeholder="Enter code"
             value={input}
@@ -93,7 +95,6 @@ export default function Home() {
 
           <button onClick={spin}>SPIN</button>
 
-          {/* ADMIN */}
           {!isAdmin ? (
             <>
               <input
@@ -121,7 +122,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* RESULT */}
       {showWin && (
         <div className="overlay">
           <div className="win">
@@ -149,6 +149,7 @@ export default function Home() {
           color: white;
           border: 3px solid black;
           animation: pulse 1.2s infinite;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         @keyframes pulse {
@@ -167,7 +168,7 @@ export default function Home() {
           width: 420px;
           height: 420px;
           border-radius: 50%;
-          border: 12px solid black;
+          border: 14px solid #c2b280;
           position: relative;
           margin-bottom: 20px;
           transition: transform 4s cubic-bezier(.2,.8,.2,1);
@@ -180,13 +181,30 @@ export default function Home() {
             #7a00ff 240deg 300deg,
             #ff00cc 300deg 360deg
           );
+
+          box-shadow:
+            inset 0 0 40px rgba(255,255,255,0.4),
+            inset 0 -20px 60px rgba(0,0,0,0.4),
+            0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .shine {
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle at 30% 30%,
+            rgba(255,255,255,0.5),
+            transparent 60%
+          );
+          pointer-events: none;
         }
 
         .emoji {
           position: absolute;
           top: 50%;
           left: 50%;
-          font-size: 32px;
+          font-size: 34px;
           transform-origin: center;
         }
 
